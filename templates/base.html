@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MediCare HMS{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
+  <a class="brand" href="{{ url_for('dashboard') }}">🏥 MediCare HMS</a>
+  <div class="top-right">
+    <span class="who">👤 {{ session.admin }}</span>
+    <a class="btn btn-sm btn-ghost" href="{{ url_for('logout') }}">Logout</a>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="sidebar" class="sidebar">
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">📊 Dashboard</a>
+
+    <div class="nav-label">SQLite (Relational)</div>
+    {% for key, m in sql_modules.items() %}
+    <a href="{{ url_for('sql_list', module=key) }}"
+       class="{{ 'active' if (request.endpoint or '').startswith('sql') and (request.view_args or {}).get('module') == key }}">
+      {{ m.icon }} {{ m.plural }}</a>
+    {% endfor %}
+
+    <div class="nav-label">MongoDB (NoSQL)</div>
+    {% for key, m in nosql_modules.items() %}
+    <a href="{{ url_for('nosql_list', module=key) }}"
+       class="{{ 'active' if (request.endpoint or '').startswith('nosql') and (request.view_args or {}).get('module') == key }}">
+      {{ m.icon }} {{ m.plural }}</a>
+    {% endfor %}
+  </nav>
+
+  <main class="content">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}<div class="alert alert-{{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+
+    {% if not_found %}
+      <div class="card center"><h1>404</h1><p>Page or record not found.</p>
+        <a class="btn" href="{{ url_for('dashboard') }}">Back to Dashboard</a></div>
+    {% else %}
+      {% block content %}{% endblock %}
+    {% endif %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

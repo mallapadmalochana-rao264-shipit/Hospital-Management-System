@@ -1,0 +1,15 @@
+{% macro record(d) -%}
+  <div><b>Diagnosis:</b> {{ d.diagnosis }}</div>
+  {% if d.symptoms %}<div class="chips">{% for s in d.symptoms %}<span class="chip">{{ s }}</span>{% endfor %}</div>{% endif %}
+  {% if d.vitals %}<p class="muted small">BP {{ d.vitals.bp or '-' }} · Temp {{ d.vitals.temp or '-' }} °F · Pulse {{ d.vitals.pulse or '-' }} bpm</p>{% endif %}
+  {% if d.notes %}<p>{{ d.notes }}</p>{% endif %}
+{%- endmacro %}
+{% macro rx(d) -%}
+  <ul>{% for m in d.medicines or [] %}<li><b>{{ m.name }}</b> — {{ m.dosage }} ({{ m.duration }})</li>{% endfor %}</ul>
+  {% if d.advice %}<p>{{ d.advice }}</p>{% endif %}
+{%- endmacro %}
+{% macro lab(d) -%}
+  <b>{{ d.test_name }}</b> <span class="badge badge-{{ d.status|lower }}">{{ d.status }}</span>
+  {% if d.results %}<ul>{% for r in d.results %}<li>{{ r.parameter }}: {{ r.value }} {{ r.unit }} (Reference: {{ r.range }})</li>{% endfor %}</ul>{% endif %}
+  {% if d.remarks %}<p>{{ d.remarks }}</p>{% endif %}
+{%- endmacro %}

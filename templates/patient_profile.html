@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% from "_macros.html" import record, rx, lab %}
+{% block title %}{{ patient.name }} · Patient 360{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>🧑 {{ patient.name }} <small class="muted">Patient 360° View</small></h1>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('sql_list', module='patients') }}">← Patients</a>
+    <a class="btn btn-ghost" href="{{ url_for('patient_api', pid=patient.patient_id) }}" target="_blank">JSON</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Patient Details <span class="tag tag-sql">SQLite</span></h3>
+  <div class="info-grid">
+    <div><span class="muted">Patient ID</span><b>{{ patient.patient_id }}</b></div>
+    <div><span class="muted">Age / Gender</span><b>{{ patient.age }} / {{ patient.gender }}</b></div>
+    <div><span class="muted">Phone</span><b>{{ patient.phone }}</b></div>
+    <div><span class="muted">Blood Group</span><b>{{ patient.blood_group or '-' }}</b></div>
+    <div><span class="muted">Registered</span><b>{{ patient.registered_on }}</b></div>
+    <div><span class="muted">Address</span><b>{{ patient.address or '-' }}</b></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Appointments <span class="tag tag-sql">SQLite · JOIN</span></h3>
+  {% if appointments %}
+  <table class="responsive">
+    <thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Department</th><th>Reason</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in appointments %}
+      <tr><td data-label="Date">{{ a.appt_date }}</td><td data-label="Time">{{ a.appt_time }}</td>
+          <td data-label="Doctor">{{ a.doctor }}</td><td data-label="Department">{{ a.department }}</td>
+          <td data-label="Reason">{{ a.reason or '-' }}</td>
+          <td data-label="Status"><span class="badge badge-{{ a.status|lower }}">{{ a.status }}</span></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No appointments.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>Billing <span class="tag tag-sql">SQLite</span></h3>
+  <p>Paid: <b>₹{{ '%.2f'|format(paid) }}</b> · Pending: <b>₹{{ '%.2f'|format(pending) }}</b></p>
+  {% if bills %}
+  <table class="responsive">
+    <thead><tr><th>Bill</th><th>Date</th><th>Amount</th><th>Status</th><th>Description</th></tr></thead>
+    <tbody>
+    {% for b in bills %}
+      <tr><td data-label="Bill">#{{ b.bill_id }}</td><td data-label="Date">{{ b.bill_date }}</td>
+          <td data-label="Amount">₹{{ '%.2f'|format(b.amount) }}</td>
+          <td data-label="Status"><span class="badge badge-{{ b.status|lower }}">{{ b.status }}</span></td>
+          <td data-label="Description">{{ b.description or '-' }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No bills.</p>{% endif %}
+</div>
+
+<div class="card">
+  <div class="page-head">
+    <h3>Medical Records <span class="tag tag-mongo">MongoDB</span></h3>
+    <a class="btn btn-sm btn-mongo" href="{{ url_for('nosql_form', module='records', patient_id=patient.patient_id) }}">+ Add</a>
+  </div>
+  {% for d in records %}
+    <div class="sub-doc"><div class="muted small">{{ d.visit_date }} · {{ d.doctor_name }}</div>{{ record(d) }}</div>
+  {% else %}<p class="muted">No medical records.</p>{% endfor %}
+</div>
+
+<div class="card">
+  <div class="page-head">
+    <h3>Prescriptions <span class="tag tag-mongo">MongoDB</span></h3>
+    <a class="btn btn-sm btn-mongo" href="{{ url_for('nosql_form', module='prescriptions', patient_id=patient.patient_id) }}">+ Add</a>
+  </div>
+  {% for d in prescriptions %}
+    <div class="sub-doc"><div class="muted small">{{ d.date }} · {{ d.doctor_name }}</div>{{ rx(d) }}</div>
+  {% else %}<p class="muted">No prescriptions.</p>{% endfor %}
+</div>
+
+<div class="card">
+  <div class="page-head">
+    <h3>Laboratory Reports <span class="tag tag-mongo">MongoDB</span></h3>
+    <a class="btn btn-sm btn-mongo" href="{{ url_for('nosql_form', module='labs', patient_id=patient.patient_id) }}">+ Add</a>
+  </div>
+  {% for d in labs %}
+    <div class="sub-doc"><div class="muted small">{{ d.date }} · {{ d.doctor_name }}</div>{{ lab(d) }}</div>
+  {% else %}<p class="muted">No lab reports.</p>{% endfor %}
+</div>
+{% endblock %}

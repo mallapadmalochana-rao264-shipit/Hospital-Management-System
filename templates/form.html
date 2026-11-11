@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} · MediCare HMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ heading }}</h1>
+  <a class="btn btn-ghost" href="{{ back_url }}">← Back</a>
+</div>
+
+<form method="post" class="card form-grid validate" novalidate>
+  {% for f in fields %}
+  <div class="field {{ 'full' if f.type == 'textarea' }}">
+    <label for="{{ f['name'] }}">{{ f.label }}{% if f.required %} <span class="req">*</span>{% endif %}</label>
+
+    {% if f.type == 'select' %}
+      <select id="{{ f['name'] }}" name="{{ f['name'] }}" {% if f.required %}required{% endif %}>
+        <option value="">-- Select --</option>
+        {% for val, lab in f.options_list %}
+          <option value="{{ val }}" {{ 'selected' if values.get(f['name']) == val }}>{{ lab }}</option>
+        {% endfor %}
+      </select>
+
+    {% elif f.type == 'textarea' %}
+      <textarea id="{{ f['name'] }}" name="{{ f['name'] }}" rows="{{ f.rows or 3 }}"
+                {% if f.maxlength %}maxlength="{{ f.maxlength }}"{% endif %}
+                {% if f.required %}required{% endif %}>{{ values.get(f['name'], '') }}</textarea>
+
+    {% else %}
+      <input id="{{ f['name'] }}" name="{{ f['name'] }}" type="{{ f.type }}"
+             value="{{ values.get(f['name'], '') }}"
+             {% if f.required %}required{% endif %}
+             {% if f.maxlength %}maxlength="{{ f.maxlength }}"{% endif %}
+             {% if f.min is defined %}min="{{ f.min }}"{% endif %}
+             {% if f.max is defined %}max="{{ f.max }}"{% endif %}
+             {% if f.step %}step="{{ f.step }}"{% endif %}
+             {% if f.pattern %}pattern="{{ f.pattern }}" title="{{ f.title }}"{% endif %}
+             {% if f.placeholder %}placeholder="{{ f.placeholder }}"{% endif %}
+             {% if f.type == 'tel' %}inputmode="numeric"{% endif %}>
+    {% endif %}
+
+    {% if f.help %}<small class="muted">{{ f.help }}</small>{% endif %}
+    <small class="error"></small>
+  </div>
+  {% endfor %}
+
+  <div class="field full actions">
+    <button class="btn" type="submit">Save</button>
+    <a class="btn btn-ghost" href="{{ back_url }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

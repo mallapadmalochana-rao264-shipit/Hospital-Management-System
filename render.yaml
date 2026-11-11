@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: hospital-management-system
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MONGO_DB
+        value: hospital_management
+      - key: MONGO_URI
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_PATH
+        value: /var/data/hospital.db
+    disk:
+      name: hospital-data
+      mountPath: /var/data
+      sizeGB: 1

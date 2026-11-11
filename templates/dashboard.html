@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · MediCare HMS{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p class="muted">Welcome, {{ session.admin }}. This page combines data from
+  <b>SQLite</b> and <b>MongoDB</b> ({{ mongo_mode }}).</p>
+
+<h3 class="section">🗄️ SQLite · Relational data</h3>
+<div class="stats">
+  <a class="stat" href="{{ url_for('sql_list', module='patients') }}"><span>{{ stats.patients }}</span>Patients</a>
+  <a class="stat" href="{{ url_for('sql_list', module='doctors') }}"><span>{{ stats.doctors }}</span>Doctors</a>
+  <a class="stat" href="{{ url_for('sql_list', module='departments') }}"><span>{{ stats.departments }}</span>Departments</a>
+  <a class="stat" href="{{ url_for('sql_list', module='appointments') }}"><span>{{ stats.appointments }}</span>Appointments</a>
+  <a class="stat" href="{{ url_for('sql_list', module='billing') }}"><span>{{ stats.pending_bills }}</span>Pending Bills</a>
+  <a class="stat" href="{{ url_for('sql_list', module='billing') }}"><span>₹{{ '%.0f'|format(stats.revenue) }}</span>Revenue (Paid)</a>
+</div>
+
+<h3 class="section">🍃 MongoDB · Document data</h3>
+<div class="stats">
+  <a class="stat stat-mongo" href="{{ url_for('nosql_list', module='records') }}"><span>{{ stats.records }}</span>Medical Records</a>
+  <a class="stat stat-mongo" href="{{ url_for('nosql_list', module='prescriptions') }}"><span>{{ stats.prescriptions }}</span>Prescriptions</a>
+  <a class="stat stat-mongo" href="{{ url_for('nosql_list', module='labs') }}"><span>{{ stats.labs }}</span>Lab Reports</a>
+  <a class="stat stat-mongo" href="{{ url_for('nosql_list', module='labs', filter='Pending') }}"><span>{{ stats.pending_labs }}</span>Pending Labs</a>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Upcoming Appointments</h3>
+    {% if upcoming %}
+    <table class="responsive">
+      <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th></tr></thead>
+      <tbody>
+      {% for a in upcoming %}
+        <tr><td data-label="Patient">{{ a.patient }}</td><td data-label="Doctor">{{ a.doctor }}</td>
+            <td data-label="Date">{{ a.appt_date }}</td><td data-label="Time">{{ a.appt_time }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No upcoming appointments.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Appointments by Department</h3>
+    {% for d in dept_load %}
+      <div class="bar-row"><span>{{ d.name }}</span>
+        <div class="bar"><div style="width: {{ d.pct }}%"></div></div><b>{{ d.cnt }}</b></div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Quick Actions</h3>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('sql_form', module='patients') }}">+ Patient</a>
+    <a class="btn" href="{{ url_for('sql_form', module='appointments') }}">+ Appointment</a>
+    <a class="btn" href="{{ url_for('sql_form', module='billing') }}">+ Bill</a>
+    <a class="btn btn-mongo" href="{{ url_for('nosql_form', module='records') }}">+ Medical Record</a>
+    <a class="btn btn-mongo" href="{{ url_for('nosql_form', module='prescriptions') }}">+ Prescription</a>
+    <a class="btn btn-mongo" href="{{ url_for('nosql_form', module='labs') }}">+ Lab Report</a>
+  </div>
+</div>
+{% endblock %}

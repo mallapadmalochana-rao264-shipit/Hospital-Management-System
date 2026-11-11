@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ mod.plural }} · MediCare HMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ mod.icon }} {{ mod.plural }} <span class="tag tag-mongo">MongoDB</span></h1>
+  <a class="btn btn-mongo" href="{{ url_for('nosql_form', module=module) }}">+ Add {{ mod.title }}</a>
+</div>
+<form class="filters" method="get">
+  <input type="search" name="q" placeholder="Search {{ mod.plural|lower }}..." value="{{ q }}">
+  {% if flt_opts %}<select name="filter"><option value="">All {{ mod.filter_label }}</option>
+    {% for o in flt_opts %}<option value="{{ o }}" {{ 'selected' if o == flt }}>{{ o }}</option>{% endfor %}
+  </select>{% endif %}
+  <button class="btn" type="submit">Search</button>
+  <a class="btn btn-ghost" href="{{ url_for('nosql_list', module=module) }}">Reset</a>
+</form>
+{% if docs %}
+  {% for d in docs %}
+  <div class="card">
+    <div class="doc-head">
+      <div><b>{{ d.patient_name }}</b> <span class="muted small">· {{ d.doctor_name }} · {{ d.get(mod.date_field, '') }}</span></div>
+      <div class="actions">
+        <a class="btn btn-sm btn-ghost" href="{{ url_for('nosql_form', module=module, doc_id=d.id) }}">Edit</a>
+        <form method="post" class="confirm-delete inline" action="{{ url_for('nosql_delete', module=module, doc_id=d.id) }}"><button class="btn btn-sm btn-danger">Delete</button></form>
+      </div>
+    </div>
+    {% if module == 'records' %}
+      <h3>{{ d.diagnosis }}</h3><p>{{ (d.symptoms or [])|join(', ') }}</p><p class="muted small">{{ d.notes or '' }}</p>
+    {% elif module == 'prescriptions' %}
+      <h3>Prescription</h3><ul>{% for m in d.medicines or [] %}<li>{{ m.name }} — {{ m.dosage }} · {{ m.duration }}</li>{% endfor %}</ul><p>{{ d.advice or '' }}</p>
+    {% else %}
+      <h3>{{ d.test_name }} <span class="badge badge-{{ d.status|lower }}">{{ d.status }}</span></h3>
+      {% for r in d.results or [] %}<p>{{ r.parameter }}: {{ r.value }} {{ r.unit }} ({{ r.range }})</p>{% endfor %}
+      <p>{{ d.remarks or '' }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}<div class="card center muted">No documents found.</div>{% endif %}
+{% endblock %}
